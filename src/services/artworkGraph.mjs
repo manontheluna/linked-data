@@ -44,19 +44,8 @@ export default class ArtworkGraph {
     }
 
     async getArtwork(uri) {
-        console.log(uri)
-
         const response = await fetch(`${uri}`)
         const data = await response.json()
-
-        console.log('getty data: ', data)
-        console.log('production timespans: ', getProductionTimespans(data))
-        console.log('production worktypes: ', getWorkTypes(data))
-        console.log('production carried out by: ', getCarriedOutBy(data))
-
-        // const creator = getCarriedOutBy(data)
-
-        // console.log('artist: ', creator[0])
 
         // return carried out by, classifications, cultures, digital images, material statements, production timespans
         // work types
