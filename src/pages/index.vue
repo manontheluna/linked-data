@@ -17,14 +17,17 @@
         </div>
         <div class="visualizer" ref="visualizer">
             <div v-if="nodes" class="center-node">
-                {{ nodes?.label }}
+                <span>
+                    {{ nodes?.label }}
+                </span>
             </div>
-            <!-- related nodes -->
+            <!-- related nodes - based on properties gathered using linkedart.js -->
             <div
                 v-for="(prop, index) in properties"
                 class="related-property"
                 :key="index"
-                :style="{ transform: `translate(${prop.x}px, ${prop.y}px)`}"
+                :style="{ top: `${prop.y}px`, left: `${prop.x}px` }"
+                @click="getRelatedData(prop)"
             >
                 <span>
                     {{ prop.k }}
@@ -35,16 +38,17 @@
 </template>
 
 <script setup>
-import { computed, inject, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 const artworkGraph = inject('artworkGraph')
 
 const works = ref()
 const searchQuery = ref()
 const visualizer = ref()
+// visualizer dimensions
+const dims = ref()
 
 async function getArtworks(searchQuery) {
     works.value = await artworkGraph.userSearch(searchQuery)
-    console.log('works in ui: ', works.value)
 }
 
 const nodes = ref()
@@ -58,18 +62,33 @@ const properties = computed(() => {
     const keys = Object.keys(nodes.value).filter(key => key !== 'id' && key !== 'label')
 
     const step = Math.PI * 2 / keys.length
-    console.log(step)
+
+    const cx = dims.value.width / 2
+    const cy = dims.value.height / 2
+
+    // center related nodes based on viewport
+    // TODO: it would be nice to have a resize observer
     const keysWithAngle = keys.map((k, i) => {
         const angle = i * step
         return {
             k,
-            x: Math.cos(angle) * 150,
-            y: Math.sin(angle) * 150
+            x: cx + Math.cos(angle) * 150,
+            y: cy + Math.sin(angle) * 150
         }
     })
     return keysWithAngle
 })
 
+function getRelatedData(label) {
+    console.log('relate label: ', label)
+    console.log('nodes.value: ', nodes.value)
+    console.log('node data: ', nodes.value[label.k])
+}
+
+onMounted(() => {
+    dims.value = visualizer.value.getBoundingClientRect()
+    console.log(dims.value)
+})
 </script>
 
 <style lang="sass">
@@ -78,12 +97,17 @@ main
     height: 100vh
     input
         width: 100%
+    span
+        text-overflow: ellipsis
+        max-width: 100%
+        white-space: nowrap
+        overflow: hidden
+        padding: .5rem
     .artworks
         display: flex
         flex-direction: column
         gap: 1rem
         li
-            border: 1px dashed
             cursor: pointer
     .center-node
         position: absolute
@@ -98,14 +122,16 @@ main
         align-items: center
         justify-content: center
     .control-panel
-        border: 1px dashed red
         height: 100%
         flex-shrink: 0
-        width: calc(100% / 5)
+        width: calc(100% / 4)
+        display: flex
+        flex-direction: column
+        padding: 1rem
+        gap: 1rem
     .related-property
         position: absolute
-        top: 50%
-        left: 50%
+        transform: translate(-50%, -50%)
         width: 4rem
         height: 4rem
         background: lightpink
@@ -113,11 +139,7 @@ main
         display: flex
         align-items: center
         justify-content: center
-        text-overflow: ellipsis
-        span
-            text-overflow: ellipsis
     .visualizer
-        border: 1px dashed blue
         flex-grow: 1
         position: relative
 
