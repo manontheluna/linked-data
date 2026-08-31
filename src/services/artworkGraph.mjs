@@ -50,14 +50,16 @@ export default class ArtworkGraph {
         // return carried out by, classifications, cultures, digital images, material statements, production timespans
         // work types
         return {
-            data,
+            id: data.id,
+            label: data._label,
             creator: getCarriedOutBy(data),
             classifications: getClassifications(data),
             cultures: getCultures(data),
             images: getDigitalImages(data),
             dims: getDimensionsDescriptions(data),
             timespans: getProductionTimespans(data),
-            materials: getMaterialStatements(data)
+            materials: getMaterialStatements(data),
+            types: getWorkTypes(data)
         }
     }
 }
