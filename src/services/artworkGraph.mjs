@@ -47,8 +47,7 @@ export default class ArtworkGraph {
         const response = await fetch(`${uri}`)
         const data = await response.json()
 
-        // return carried out by, classifications, cultures, digital images, material statements, production timespans
-        // work types
+        // returns artwork + related properties to display on GUI
         return {
             id: data.id,
             label: data._label,
@@ -56,7 +55,7 @@ export default class ArtworkGraph {
             classifications: getClassifications(data),
             cultures: getCultures(data),
             images: getDigitalImages(data),
-            dims: getDimensionsDescriptions(data),
+            dimensions: getDimensionsDescriptions(data),
             timespans: getProductionTimespans(data),
             materials: getMaterialStatements(data),
             types: getWorkTypes(data)
