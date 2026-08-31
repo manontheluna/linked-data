@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import App from './app.vue'
 import HomePage from './pages/index.vue'
-import ArtworkGraph from './services/artworkGraph.js'
+import ArtworkGraph from './services/artworkGraph.mjs'
 
 // Set up app
 const app = createApp(App)
