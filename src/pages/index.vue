@@ -57,7 +57,6 @@ async function getArtworks(searchQuery) {
 const nodes = ref()
 async function getArtworkData(uri) {
     nodes.value = await artworkGraph.getArtwork(uri)
-    console.log('nodes: ', nodes.value)
 }
 
 const properties = computed(() => {

@@ -47,7 +47,6 @@ export default class ArtworkGraph {
     async getArtwork(uri) {
         const response = await fetch(`${uri}`)
         const data = await response.json()
-        console.log('initial data: ', data)
 
         // returns artwork + related properties to display on GUI
         return {
@@ -68,7 +67,6 @@ export default class ArtworkGraph {
     async getSecondaryRelationship(uri) {
         const data = await fetch(`${uri}`)
         const response = await data.json()
-        console.log('response: ', response)
 
         if (response.type === 'Person') {
             return {
