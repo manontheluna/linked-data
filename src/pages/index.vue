@@ -1,7 +1,10 @@
 <template>
     <main>
         <div class="control-panel">
-            <input type="text" v-model="searchQuery">
+            <label>
+                Search For Artwork
+                <input type="text" v-model="searchQuery">
+            </label>
             <button @click="getArtworks(searchQuery)">
                 submit
             </button>
@@ -30,7 +33,7 @@
                 @click="getRelatedData(prop)"
             >
                 <span>
-                    {{ prop.k }}
+                    {{ prop.key }}
                 </span>
             </div>
         </div>
@@ -54,6 +57,7 @@ async function getArtworks(searchQuery) {
 const nodes = ref()
 async function getArtworkData(uri) {
     nodes.value = await artworkGraph.getArtwork(uri)
+    console.log('nodes: ', nodes.value)
 }
 
 const properties = computed(() => {
@@ -68,10 +72,10 @@ const properties = computed(() => {
 
     // center related nodes based on viewport
     // TODO: it would be nice to have a resize observer
-    const keysWithAngle = keys.map((k, i) => {
+    const keysWithAngle = keys.map((key, i) => {
         const angle = i * step
         return {
-            k,
+            key,
             x: cx + Math.cos(angle) * 150,
             y: cy + Math.sin(angle) * 150
         }
@@ -79,15 +83,21 @@ const properties = computed(() => {
     return keysWithAngle
 })
 
-function getRelatedData(label) {
-    console.log('relate label: ', label)
-    console.log('nodes.value: ', nodes.value)
-    console.log('node data: ', nodes.value[label.k])
+async function getRelatedData(label) {
+    // this is a problem
+    const property = nodes.value[label.key]
+    // some properties come as an array, some as an object, check before just in case
+    // currently grabbing just the first of any objects for testing and GUI purposes
+    // TODO: should iterate through properties to get all relevant values
+    const relationship = Array.isArray(property) ? property[0] : property
+    // if no id just exit
+    if (!relationship.id) return
+    const data = await artworkGraph.getSecondaryRelationship(relationship.id)
+    nodes.value = data
 }
 
 onMounted(() => {
     dims.value = visualizer.value.getBoundingClientRect()
-    console.log(dims.value)
 })
 </script>
 
@@ -106,9 +116,13 @@ main
     .artworks
         display: flex
         flex-direction: column
-        gap: 1rem
+        gap: .5rem
+        list-style: none
         li
             cursor: pointer
+            padding: .5rem
+            background: lightblue
+            border-radius: .5rem
     .center-node
         position: absolute
         top: 50%
@@ -128,7 +142,8 @@ main
         display: flex
         flex-direction: column
         padding: 1rem
-        gap: 1rem
+        gap: .5rem
+        background: #ededed
     .related-property
         position: absolute
         transform: translate(-50%, -50%)
@@ -139,8 +154,10 @@ main
         display: flex
         align-items: center
         justify-content: center
+        transition: .2s all ease-in-out
+        cursor: pointer
     .visualizer
         flex-grow: 1
         position: relative
-
+        background: #000
 </style>

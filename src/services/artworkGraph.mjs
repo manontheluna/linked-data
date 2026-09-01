@@ -7,7 +7,8 @@ import {
     getCultures,
     getDigitalImages,
     getDimensionsDescriptions,
-    getMaterialStatements,
+    getFieldValuesByClassifications,
+    getPrimaryName,
     getProductionTimespans,
     getWorkTypes
 } from '@thegetty/linkedart.js'
@@ -46,19 +47,39 @@ export default class ArtworkGraph {
     async getArtwork(uri) {
         const response = await fetch(`${uri}`)
         const data = await response.json()
+        console.log('initial data: ', data)
 
         // returns artwork + related properties to display on GUI
         return {
             id: data.id,
-            label: data._label,
+            label: getPrimaryName(data),
             creator: getCarriedOutBy(data),
-            classifications: getClassifications(data),
-            cultures: getCultures(data),
-            images: getDigitalImages(data),
+            // classifications: getClassifications(data),
+            // cultures: getCultures(data),
+            // images: getDigitalImages(data),
             dimensions: getDimensionsDescriptions(data),
             timespans: getProductionTimespans(data),
-            materials: getMaterialStatements(data),
+            // use explicit material value here, contains uri for further queries
+            // materials: data.made_of,
             types: getWorkTypes(data)
         }
+    }
+
+    async getSecondaryRelationship(uri) {
+        const data = await fetch(`${uri}`)
+        const response = await data.json()
+        console.log('response: ', response)
+
+        if (response.type === 'Person') {
+            return {
+                id: response.id,
+                label: response._label,
+                born: response.born,
+                died: response.died,
+                classifications: getClassifications(response),
+                identifiedBy: response.identified_by
+            }
+        }
+        return response
     }
 }
